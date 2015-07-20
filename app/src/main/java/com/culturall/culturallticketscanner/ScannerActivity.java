@@ -1,5 +1,6 @@
 package com.culturall.culturallticketscanner;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,18 +12,40 @@ import android.widget.EditText;
 
 public class ScannerActivity extends ActionBarActivity {
 
+    static EditText editText;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+
+
+                editText.setText(intent.getStringExtra("SCAN_RESULT")); // This will contain your scan result
+                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+
+
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EditText editText = (EditText) findViewById(R.id.editText);
-        Button scanButton = (Button) findViewById(R.id.scan_button);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
+
+
+        editText = (EditText) findViewById(R.id.editText);
+        Button scanButton = (Button) findViewById(R.id.scan_button);
 
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                
+                Intent intent = new Intent(
+                        "com.google.zxing.client.android.SCAN");
+                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                startActivityForResult(intent, 0);
             }
         });
     }
