@@ -1,16 +1,19 @@
 package com.culturall.culturallticketscanner;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 
 
-public class ScannerActivity extends ActionBarActivity {
+public class ScannerActivity extends Activity {
 
     static EditText editText;
 
@@ -20,12 +23,8 @@ public class ScannerActivity extends ActionBarActivity {
 
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
-
-
                 editText.setText(intent.getStringExtra("SCAN_RESULT")); // This will contain your scan result
                 String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-
-
             }
         }
     }
@@ -38,6 +37,7 @@ public class ScannerActivity extends ActionBarActivity {
 
         editText = (EditText) findViewById(R.id.editText);
         Button scanButton = (Button) findViewById(R.id.scan_button);
+        WebView webView = (WebView) findViewById(R.id.webView);
 
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +48,58 @@ public class ScannerActivity extends ActionBarActivity {
                 startActivityForResult(intent, 0);
             }
         });
+
+        startWebView(webView, "https://www.culturall.com/ticket/hmk");
+    }
+
+    //defines the WebView behaviour
+    private void startWebView(WebView webView, String url) {
+
+        //set the webView client
+        webView.setWebViewClient(new WebViewClient() {
+            ProgressDialog progressDialog;
+            boolean initialLoad = false;
+
+            //if we omit this method url links are open in the new browser, not in this webView
+            public boolean shouldOverrideUrlLoading(WebView  view, String url) {
+                if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(ScannerActivity.this);
+                    progressDialog.setMessage("Loading, please wait!");
+                    progressDialog.show();
+                }
+                view.loadUrl(url);
+                return true;
+            }
+
+            //show loader on url load
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                if (initialLoad) {
+                    return;
+                }
+
+                initialLoad = true;
+                if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(ScannerActivity.this);
+                    progressDialog.setMessage("Loading...");
+                    progressDialog.show();
+                }
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                try {
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                        progressDialog = null;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl(url);
     }
 
     @Override
@@ -68,7 +120,6 @@ public class ScannerActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }
