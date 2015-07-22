@@ -1,12 +1,15 @@
 package com.culturall.culturallticketscanner;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -38,6 +41,11 @@ public class ScannerActivity extends Activity {
         editText = (EditText) findViewById(R.id.editText);
         Button scanButton = (Button) findViewById(R.id.scan_button);
         WebView webView = (WebView) findViewById(R.id.webView);
+
+        //add JavaScriptInterface to the WebView
+        final MyJavacriptInterface myJsInterface = new MyJavacriptInterface(this);
+
+        webView.addJavascriptInterface(myJsInterface, "Android Function");
 
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,5 +129,22 @@ public class ScannerActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public class MyJavacriptInterface {
+        Context mContext;
+
+        MyJavacriptInterface(Context c) {
+            mContext = c;
+        }
+
+        @JavascriptInterface
+        public void openAndroidDialog() {
+            AlertDialog.Builder myDialog = new AlertDialog.Builder(ScannerActivity.this);
+            myDialog.setTitle("Dialog Title");
+            myDialog.setMessage("Dialog Message");
+            myDialog.setPositiveButton("ON", null);
+            myDialog.show();
+        }
     }
 }
